@@ -3,12 +3,36 @@
 <head>
 <meta charset="utf-8">
 <title>English 24 LLM Demo</title>
-<meta http-equiv="refresh" content="0; url=https://saved-released-exceptions-databases.trycloudflare.com/">
-<script>location.replace("https://saved-released-exceptions-databases.trycloudflare.com/");</script>
 <style>body{font:16px Georgia,serif;max-width:34em;margin:15vh auto;padding:0 1em;color:#222}</style>
 </head>
 <body>
-<p>Redirecting you to the English 24 LLM Demo…</p>
-<p>If nothing happens, <a href="https://saved-released-exceptions-databases.trycloudflare.com/">click here</a>.</p>
+<p id="msg">Redirecting you to the English 24 LLM Demo…</p>
+<script>
+const CT = "cae9678ad9b548dd9dbace6636529cd3a9e1f88158ef01db29b5b18e62403ccedb6679427c74c1a3040dae5fbadda9182db1e6de37d106f6274305";
+async function main() {
+  const m = location.hash.match(/k=([0-9a-f]+)/);
+  if (!m) { document.getElementById("msg").textContent = "This page needs an access link — use the one on the course site."; return; }
+  const key = m[1];
+  const ct = Uint8Array.from(CT.match(/../g), h => parseInt(h, 16));
+  const enc = new TextEncoder();
+  let ks = new Uint8Array(0), i = 0;
+  while (ks.length < ct.length) {
+    const d = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(key + ":" + i)));
+    const t = new Uint8Array(ks.length + d.length);
+    t.set(ks); t.set(d, ks.length); ks = t; i++;
+  }
+  const url = new TextDecoder().decode(ct.map((b, j) => b ^ ks[j]));
+  if (!/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(url)) {
+    document.getElementById("msg").textContent = "That access link is not valid.";
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = url + "/";
+  a.textContent = "Click here if you are not redirected.";
+  document.body.appendChild(a);
+  location.replace(url + "/");
+}
+main();
+</script>
 </body>
 </html>
